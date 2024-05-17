@@ -40,6 +40,18 @@ pipeline {
                 archiveArtifacts(artifacts: 'backend/target/sausage-store-0.0.1-SNAPSHOT.jar')
                 archiveArtifacts(artifacts: 'frontend/dist/frontend/*')
             }
+	    post {
+	    	success {
+		curl -X POST -H 'Content-type: application/json' \
+		--data '{"chat_id": "1002138916913", "text": "Федотов Андрей собрал приложение." }' \
+		https://api.telegram.org/bot5933756043:AAE8JLL5KIzgrNBeTP5e-1bkbJy4YRoeGjs/sendMessage 
+
+//# -X — указывает на метод запроса (GET, POST, PUT, DELETE и так далее)
+//# -H — хедер запроса в виде: ключ: значение
+//# --data — содержимое запроса или по-другому payload
+//# https://api.telegram.org/bot<Bot Token>/sendMessage — адрес, на который отправляется запрос //отправка нотификации
+		}
+	    }
         }
     }
 } 
