@@ -13,6 +13,7 @@ build-backend-code-job:
   artifacts:
     paths:
       - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
+
 telegram-notification-backend:
   stage: notify
   only:
@@ -27,6 +28,8 @@ telegram-notification-backend:
       https://api.telegram.org/bot5933756043:AAE8JLL5KIzgrNBeTP5e-1bkbJy4YRoeGjs/sendMessage
   needs:
       - build-backend-code-job
+
+
 
 
 
