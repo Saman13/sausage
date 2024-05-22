@@ -1,0 +1,44 @@
+stages:
+  - build
+  include: '/backend/.gitlab-ci.yml'
+  include: '/frontend/.gitlab-ci.yml'
+
+telegram-notification-backend:
+  stage: notify
+  only:
+    changes:
+    - backend/**/*
+  script:
+    - curl <отправка вашего сообщения>
+  needs:
+    - build-backend-code-job
+
+telegram-notification-frontend:
+  stage: notify
+  only:
+    changes:
+    - frontend/**/*
+  script:
+    - curl <отправка вашего сообщения>
+  needs:
+    - build-frontend-code-job
+
+telegram-notification-backend:
+  stage: notify
+  only:
+    changes:
+    - backend/**/*
+  script:
+    - curl <отправка вашего сообщения>
+  needs:
+    - build-backend-code-job
+
+telegram-notification-frontend:
+  stage: notify
+  only:
+    changes:
+    - frontend/**/*
+  script:
+    - curl <отправка вашего сообщения>
+  needs:
+    - build-frontend-code-job
