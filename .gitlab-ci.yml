@@ -1,7 +1,9 @@
 stages:
   - build
-  include: '/backend/.gitlab-ci.yml'
-  include: '/frontend/.gitlab-ci.yml'
+    
+include:
+  - local: /backend/.gitlab-ci.yml
+  - local: /frontend/.gitlab-ci.yml
 
 telegram-notification-backend:
   stage: notify
