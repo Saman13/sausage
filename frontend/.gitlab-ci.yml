@@ -21,7 +21,7 @@ sonarqube-frontend-sast:
   image: sonarsource/sonar-scanner-cli:latest
   script:
     - cd frontend
-    - sonar-scaner -Dsonar.projectKey=$SONAR_PROJECT_KEY_FRONT -Dsonar.sources=. -Dsonar.host.url=$SONARQUBE_URL -Dsonar.login=$SONAR_LOGIN
+    - sonar-scanner -Dsonar.projectKey=$SONAR_PROJECT_KEY_FRONT -Dsonar.sources=. -Dsonar.host.url=$SONARQUBE_URL -Dsonar.login=$SONAR_LOGIN
   allow_failure: true
   needs:
     - build-frontend-job
