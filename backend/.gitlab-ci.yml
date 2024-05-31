@@ -37,7 +37,7 @@ sonarqube-backend-sast:
     - mvn -f backend/pom.xml -X verify sonar:sonar \
       -Dsonar.qualitygate.wait=true \ 
       -Dsonar.projectKey=$SONAR_PROJECT_KEY_BACK \
-      -Dsonar.host.url=$SONARQUBE_URL \
+      -Dsonar.host.url=https://$SONARQUBE_URL \
       -Dsonar.login=$SONAR_LOGIN \
       -Dsonar.projectName=$SONAR_PROJECT_NAME_BACKEND
   allow_failure: true
