@@ -18,17 +18,17 @@ build-backend-code-job:
     paths:
       - backend/target/sausage-store-0.0.1-SNAPSHOT.jar
 
-#semgrep-sast:
-#  stage: test
-#  variables:
-#    COMPILE: "false"
-#    SAST_JAVA_VERSION: 11
-#    MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository
-#  cache:
-#    paths:
-#      - ${CI_PROJECT_DIR}/.m2/repository
-#  needs:
-#    - build-backend-code-job
+semgrep-sast:
+  stage: test
+  variables:
+    COMPILE: "false"
+    SAST_JAVA_VERSION: 11
+    MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository
+  cache:
+    paths:
+      - ${CI_PROJECT_DIR}/.m2/repository
+  needs:
+    - build-backend-code-job
 
 sonarqube-backend-sast:
   stage: test
@@ -50,10 +50,10 @@ telegram-notification-backend:
   script:
     - >
       curl -X POST -H "Content-type: application/json"
-      --data "{\"chat_id\": \"-1002138916913\", \"text\": \"Андрей Федотов собрал backend. $CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_SHA/download?job=build-backend-code-job\"}"
+      --data "{\"chat_id\": \"-1002138916913\", \"text\": \"Андрей Федотов собрал backend и тесты прошли успешно. $CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_SHA/download?job=build-backend-code-job\"}"
       https://api.telegram.org/bot5933756043:AAE8JLL5KIzgrNBeTP5e-1bkbJy4YRoeGjs/sendMessage
   needs:
-      - build-backend-code-job
+      - sonarqube-backend-sast
 
 
 
