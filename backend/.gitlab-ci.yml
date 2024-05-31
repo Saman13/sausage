@@ -33,21 +33,14 @@ build-backend-code-job:
 sonarqube-backend-sast:
   stage: test
   image: maven:3.8-openjdk-16
-  variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"  # Defines the location of the analysis task cache
-    GIT_DEPTH: "0"  # Tells git to fetch all the branches of the project, required by the analysis task
-  cache:
-    key: "${CI_JOB_NAME}"
-    paths:
-      - .sonar/cache
-  script:
-    - mvn verify sonar:sonar \
-      -Dsonar.qualitygate.wait=true \ 
-      -Dsonar.projectKey=$SONAR_PROJECT_KEY_BACK \
-      -Dsonar.host.url=$SONARQUBE_URL \
-      -Dsonar.login=$SONAR_LOGIN \
-      -Dsonar.projectName=$SONAR_PROJECT_NAME_BACKEND
-  allow_failure: true
+    script:
+      - mvn -f backend/pom.xml -X verify sonar:sonar \
+        -Dsonar.qualitygate.wait=true \ 
+        -Dsonar.projectKey=$SONAR_PROJECT_KEY_BACK \
+        -Dsonar.host.url=$SONARQUBE_URL \
+        -Dsonar.login=$SONAR_LOGIN \
+        -Dsonar.projectName=$SONAR_PROJECT_NAME_BACKEND
+    allow_failure: true
   needs:
     - build-backend-code-job
 
