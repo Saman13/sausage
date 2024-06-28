@@ -41,3 +41,4 @@ telegram-notification-frontend:
   needs:
       - sonarqube-frontend-sast
 
+
