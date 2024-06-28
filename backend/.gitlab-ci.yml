@@ -56,5 +56,3 @@ telegram-notification-backend:
       - semgrep-sast
 
 
-
-
