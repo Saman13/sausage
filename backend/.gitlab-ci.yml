@@ -2,6 +2,7 @@ stages:
   - build
   - test
   - notify
+  - release
 
 include:
   - template: Security/SAST.gitlab-ci.yml
@@ -54,5 +55,17 @@ telegram-notification-backend:
   needs:
       - sonarqube-backend-sast
       - semgrep-sast
+upload-backend-release:
+  stage: release
+  only:
+    changes:
+      - backend/**/*
+  needs:
+    - build-backend-code-job
+  script:
+    - cd backend
+    - >
+      mvn deploy -DskipTests -Dmaven.repo.local=${CI_PROJECT_DIR}/.m2/repository 
+      -s settings.xml -Dversion.application=${VERSION}
 
 
