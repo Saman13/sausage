@@ -57,5 +57,3 @@ upload-frontend-release:
       ${NEXUS_REPO_URL}/${NEXUS_REPO_FRONTEND_NAME}/${VERSION}/sausage-store-${VERSION}.tar.gz
 
 
-
-
