@@ -4,7 +4,8 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
+        <artifactId>sausage-store</artifactId>
+        <name>sausage-store</name>
         <version>${version.application}</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
