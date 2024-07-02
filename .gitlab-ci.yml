@@ -2,7 +2,13 @@ stages:
   - build
   - test
   - notify
+  - release
     
 include:
   - local: /backend/.gitlab-ci.yml
   - local: /frontend/.gitlab-ci.yml
+
+cache:
+  paths:
+    - ${CI_PROJECT_DIR}/.m2/repository # для хранения зависимостей бэкенда
+    - .npm/ # для хранения зависимостей сборки фронтенда 
