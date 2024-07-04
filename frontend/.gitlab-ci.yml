@@ -52,3 +52,6 @@ deploy:
   rules:
     - changes:
         - frontend/**/*
+    environment:
+      name: staging
+      url: http://std-030-13.praktikum-services.tech/
