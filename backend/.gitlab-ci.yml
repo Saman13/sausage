@@ -88,6 +88,9 @@ deploy:
   rules:
     - changes:
         - backend/**/*
+  needs:
+    - sonarqube-backend-sast
+    - gitlab-sast
 
 telegram-notification-backend:
   stage: notify
