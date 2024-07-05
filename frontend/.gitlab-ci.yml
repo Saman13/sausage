@@ -7,6 +7,8 @@ variables:
 
 stages:
    - build
+   - test
+   - notify
    - release
    - deploy
 
@@ -20,6 +22,28 @@ build:
      changes:
      - frontend/**/*
 
+# Запуск проверки сонаром
+sonarqube-frontend-sast:
+  stage: test
+  script:
+    - cd frontend
+    - npm install -g sonarqube-scanner
+    - >
+      sonar-scanner -Dsonar.projectKey=${SONAR_PROJECT_KEY_FRONTEND}
+      -Dsonar.sources=.
+      -Dsonar.host.url=${SONARQUBE_URL}
+      -Dsonar.login=${SONAR_LOGIN}
+  needs:
+    - build
+
+gitlab-sast:
+  stage: test
+  trigger:
+    include:
+      - template: Security/SAST.gitlab-ci.yml
+  needs:
+    - build
+
 release:
   stage: release
   script:
@@ -31,6 +55,9 @@ release:
   only:
     changes:
     - frontend/**/*
+  needs:
+    - sonarqube-frontend-sast
+    - gitlab-sast
 
 deploy:
   stage: deploy
@@ -55,3 +82,23 @@ deploy:
   rules:
     - changes:
         - frontend/**/*
+  needs:
+      - sonarqube-frontend-sast
+      - gitlab-sast
+
+telegram-notification-frontend:
+  stage: notify
+  only:
+    changes:
+      - frontend/**/*
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /send notification/
+
+  script:
+    - >
+      curl -X POST -H "Content-type: application/json"
+      --data "{\"chat_id\": \"-1002138916913\", \"text\": \"Андрей Федотов собрал frontend и тесты успешно завершены. $CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_SHA/download?job=build-job\"}"
+      https://api.telegram.org/bot5933756043:AAE8JLL5KIzgrNBeTP5e-1bkbJy4YRoeGjs/sendMessage
+  needs:
+      - sonarqube-frontend-sast
+      - gitlab-sast
