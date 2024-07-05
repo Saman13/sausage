@@ -4,6 +4,8 @@ Description=Backend service
 [Service]
 User=backend
 Group=backend
+StandardOutput=append:/opt/log/sausage-store-backend.log
+Restart=always
 WorkingDirectory=/var/sausage-store/
 Environment=LOG_PATH=/var/sausage-store/
 Environment=REPORT_PATH=/var/sausage-store/reports/
