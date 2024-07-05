@@ -7,6 +7,8 @@ variables:
 
 stages:
    - build
+   - test
+   - notify
    - release
    - deploy
 
@@ -19,18 +21,6 @@ build:
    only:
      changes:
      - frontend/**/*
-
-release:
-  stage: release
-  script:
-    - cd frontend/dist
-    - tar czvf sausage-store-${VERSION}.tar.gz frontend
-    - >
-      curl -v -u "${NEXUS_REPO_USER}:${NEXUS_REPO_PASS}" --upload-file sausage-store-${VERSION}.tar.gz
-      ${NEXUS_REPO_URL}/repository/${NEXUS_REPO_FRONTEND_NAME}/${VERSION}/sausage-store-${VERSION}.tar.gz
-  only:
-    changes:
-    - frontend/**/*
 
 sonarqube-frontend-sast:
   stage: test
@@ -56,6 +46,18 @@ telegram-notification-frontend:
       https://api.telegram.org/bot5933756043:AAE8JLL5KIzgrNBeTP5e-1bkbJy4YRoeGjs/sendMessage
   needs:
       - sonarqube-frontend-sast
+
+release:
+  stage: release
+  script:
+    - cd frontend/dist
+    - tar czvf sausage-store-${VERSION}.tar.gz frontend
+    - >
+      curl -v -u "${NEXUS_REPO_USER}:${NEXUS_REPO_PASS}" --upload-file sausage-store-${VERSION}.tar.gz
+      ${NEXUS_REPO_URL}/repository/${NEXUS_REPO_FRONTEND_NAME}/${VERSION}/sausage-store-${VERSION}.tar.gz
+  only:
+    changes:
+    - frontend/**/*
 
 deploy:
   stage: deploy
