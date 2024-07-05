@@ -56,9 +56,6 @@ release:
          mvn deploy -DskipTests -s settings.xml
          -Dversion.application=${VERSION}
          -Dmaven.repo.local=${MAVEN_REPO_PATH}
-   rules:
-      - changes:
-           - backend/**/*
    needs:
      - sonarqube-backend-sast
      - gitlab-sast
@@ -86,17 +83,16 @@ deploy:
     name: backend
     url: http://std-030-13.praktikum-services.tech/
   rules:
-    - changes:
-        - backend/**/*
+    - when: manual # Специальное условие, требующее ручного нажатия для установки на виртуальную машину нового обновления
+
   needs:
     - sonarqube-backend-sast
     - gitlab-sast
 
+
 telegram-notification-backend:
   stage: notify
   only:
-    changes:
-      - backend/**/*
     variables:
       - $CI_COMMIT_MESSAGE =~ /send notification/
   script:

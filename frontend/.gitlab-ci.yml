@@ -18,9 +18,9 @@ build:
      - cd frontend
      - npm install
      - npm run build
-   only:
-     changes:
-     - frontend/**/*
+   rules:
+      - changes:
+           - frontend/**/*
 
 # Запуск проверки сонаром
 sonarqube-frontend-sast:
@@ -52,9 +52,6 @@ release:
     - >
       curl -v -u "${NEXUS_REPO_USER}:${NEXUS_REPO_PASS}" --upload-file sausage-store-${VERSION}.tar.gz
       ${NEXUS_REPO_URL}/repository/${NEXUS_REPO_FRONTEND_NAME}/${VERSION}/sausage-store-${VERSION}.tar.gz
-  only:
-    changes:
-    - frontend/**/*
   needs:
     - sonarqube-frontend-sast
     - gitlab-sast
@@ -80,8 +77,7 @@ deploy:
     name: frontend
     url: http://std-030-13.praktikum-services.tech/
   rules:
-    - changes:
-        - frontend/**/*
+    - when: manual # Специальное условие, требующее ручного нажатия для установки на виртуальную машину нового обновления
   needs:
       - sonarqube-frontend-sast
       - gitlab-sast
