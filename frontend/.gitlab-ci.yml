@@ -55,5 +55,3 @@ deploy:
   rules:
     - changes:
         - frontend/**/*
-
-#test
