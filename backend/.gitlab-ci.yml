@@ -29,8 +29,6 @@ build:
 sonarqube-backend-sast:
   stage: test
   image: maven:3.8-openjdk-16
-  needs:
-    - build
   script:
     - cd backend
     - >
@@ -43,11 +41,12 @@ sonarqube-backend-sast:
 
 gitlab-sast:
   stage: test
-  needs:
-    - build
   trigger:
     include:
       - template: Security/SAST.gitlab-ci.yml
+  needs:
+    - build
+
 
 release:
    stage: release
@@ -60,6 +59,9 @@ release:
    rules:
       - changes:
            - backend/**/*
+   needs:
+     - sonarqube-backend-sast
+     - gitlab-sast
 
 deploy:
   stage: deploy
