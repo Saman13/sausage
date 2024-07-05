@@ -26,42 +26,28 @@ build:
       - changes:
            - backend/**/*
 
-semgrep-sast:
-  stage: test
-  variables:
-    COMPILE: "false"
-    SAST_JAVA_VERSION: 11
-    MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository
-  cache:
-    paths:
-      - ${CI_PROJECT_DIR}/.m2/repository
-  needs:
-    - build-backend-code-job
-
 sonarqube-backend-sast:
   stage: test
   image: maven:3.8-openjdk-16
+  needs:
+    - build
   script:
     - cd backend
-    - mvn verify sonar:sonar -Dsonar.qualitygate.wait=true -Dsonar.projectKey=$SONAR_PROJECT_KEY_BACK -Dsonar.host.url=$SONARQUBE_URL -Dsonar.login=$SONAR_LOGIN -Dsonar.projectName=$SONAR_PROJECT_NAME_BACKEND
-  needs:
-    - build-backend-code-job
-
-telegram-notification-backend:
-  stage: notify
-  only:
-    changes:
-      - backend/**/*
-    variables:
-      - $CI_COMMIT_MESSAGE =~ /send notification/
-  script:
     - >
-      curl -X POST -H "Content-type: application/json"
-      --data "{\"chat_id\": \"-1002138916913\", \"text\": \"Андрей Федотов собрал backend и тесты прошли успешно. $CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_SHA/download?job=build-backend-code-job\"}"
-      https://api.telegram.org/bot5933756043:AAE8JLL5KIzgrNBeTP5e-1bkbJy4YRoeGjs/sendMessage
+      mvn verify sonar:sonar -Dsonar.qualitygate.wait=true
+      -Dsonar.projectKey=${SONAR_PROJECT_KEY_BACK}
+      -Dsonar.host.url=${SONARQUBE_URL}
+      -Dsonar.login=${SONAR_LOGIN_BACK}
   needs:
-      - sonarqube-backend-sast
-      - semgrep-sast
+    - build
+
+gitlab-sast:
+  stage: test
+  needs:
+    - build
+  trigger:
+    include:
+      - template: Security/SAST.gitlab-ci.yml
 
 release:
    stage: release
@@ -100,3 +86,19 @@ deploy:
   rules:
     - changes:
         - backend/**/*
+
+telegram-notification-backend:
+  stage: notify
+  only:
+    changes:
+      - backend/**/*
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /send notification/
+  script:
+    - >
+      curl -X POST -H "Content-type: application/json"
+      --data "{\"chat_id\": \"-1002138916913\", \"text\": \"Андрей Федотов собрал backend и тесты прошли успешно. $CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_SHA/download?job=build-backend-code-job\"}"
+      https://api.telegram.org/bot5933756043:AAE8JLL5KIzgrNBeTP5e-1bkbJy4YRoeGjs/sendMessage
+  needs:
+      - sonarqube-backend-sast
+      - gitlab-sast

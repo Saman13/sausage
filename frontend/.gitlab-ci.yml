@@ -22,30 +22,29 @@ build:
      changes:
      - frontend/**/*
 
+# Запуск проверки сонаром
 sonarqube-frontend-sast:
   stage: test
-  image: sonarsource/sonar-scanner-cli:latest
+  needs:
+    - build-frontend
   script:
     - cd frontend
-    - sonar-scanner -Dsonar.projectKey=$SONAR_PROJECT_KEY_FRONT -Dsonar.sources=. -Dsonar.host.url=$SONARQUBE_URL -Dsonar.login=$SONAR_LOGIN
-  needs:
-    - build-frontend-job
-
-telegram-notification-frontend:
-  stage: notify
-  only:
-    changes:
-      - frontend/**/*
-    variables:
-      - $CI_COMMIT_MESSAGE =~ /send notification/
-
-  script:
+    - npm install -g sonarqube-scanner
     - >
-      curl -X POST -H "Content-type: application/json"
-      --data "{\"chat_id\": \"-1002138916913\", \"text\": \"Андрей Федотов собрал frontend и тесты успешно завершены. $CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_SHA/download?job=build-frontend-job\"}"
-      https://api.telegram.org/bot5933756043:AAE8JLL5KIzgrNBeTP5e-1bkbJy4YRoeGjs/sendMessage
+      sonar-scanner -Dsonar.projectKey=${SONAR_PROJECT_KEY_FRONTEND}
+      -Dsonar.sources=.
+      -Dsonar.host.url=${SONARQUBE_URL}
+      -Dsonar.login=${SONAR_LOGIN_FRONT}
   needs:
-      - sonarqube-frontend-sast
+    - build
+
+gitlab-sast:
+  stage: test
+  needs:
+    - build-frontend
+  trigger:
+    include:
+      - template: Security/SAST.gitlab-ci.yml
 
 release:
   stage: release
@@ -82,3 +81,20 @@ deploy:
   rules:
     - changes:
         - frontend/**/*
+
+telegram-notification-frontend:
+  stage: notify
+  only:
+    changes:
+      - frontend/**/*
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /send notification/
+
+  script:
+    - >
+      curl -X POST -H "Content-type: application/json"
+      --data "{\"chat_id\": \"-1002138916913\", \"text\": \"Андрей Федотов собрал frontend и тесты успешно завершены. $CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_SHA/download?job=build-frontend-job\"}"
+      https://api.telegram.org/bot5933756043:AAE8JLL5KIzgrNBeTP5e-1bkbJy4YRoeGjs/sendMessage
+  needs:
+      - sonarqube-frontend-sast
+      - gitlab-sast
