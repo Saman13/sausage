@@ -89,6 +89,8 @@ deploy:
 #  rules:
 #    - when: manual # Специальное условие, требующее ручного нажатия для установки на виртуальную машину нового обновления
 
+
+
   needs:
     - sonarqube-backend-sast
     - gitlab-sast
