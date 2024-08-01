@@ -30,6 +30,8 @@ build:
 
 sonarqube-backend-sast:
   stage: test
+  variables:
+    SPRING_FLYWAY_ENABLED: "false"
   image: maven:3.8-openjdk-16
   script:
     - cd backend
