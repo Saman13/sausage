@@ -16,6 +16,8 @@ stages:
 
 build:
    stage: build
+   variables:
+     SPRING_FLYWAY_ENABLED: "false"
    script:
       - cd backend
       - >
@@ -82,8 +84,8 @@ deploy:
   environment:
     name: backend
     url: http://std-030-13.praktikum-services.tech/
-  rules:
-    - when: manual # Специальное условие, требующее ручного нажатия для установки на виртуальную машину нового обновления
+#  rules:
+#    - when: manual # Специальное условие, требующее ручного нажатия для установки на виртуальную машину нового обновления
 
   needs:
     - sonarqube-backend-sast
