@@ -31,8 +31,6 @@ build:
 sonarqube-backend-sast:
   stage: test
   image: maven:3.8-openjdk-16
-  variables:
-    SPRING_FLYWAY_ENABLED: "false"
   script:
     - cd backend
     - >
@@ -45,8 +43,6 @@ sonarqube-backend-sast:
 
 gitlab-sast:
   stage: test
-  variables:
-    SPRING_FLYWAY_ENABLED: "false"
   trigger:
     include:
       - template: Security/SAST.gitlab-ci.yml
