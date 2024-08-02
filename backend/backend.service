@@ -12,8 +12,8 @@ Environment=LOG_PATH=/var/sausage-store/
 Environment=REPORT_PATH=/var/sausage-store/reports/
 
 # подставьте значения переменных
-Environment=PSQL_USER="std-030-13"
-Environment=PSQL_PASSWORD="Testusr1234"
+Environment=PSQL_USER=${flyway_user}
+Environment=PSQL_PASSWORD=${flyway_password}
 Environment=PSQL_HOST="rc1a-kylrrnh13yjqhvlv.mdb.yandexcloud.net"
 Environment=PSQL_DBNAME="std-030-13"
 Environment=PSQL_PORT="6432"
