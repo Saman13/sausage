@@ -16,6 +16,8 @@ stages:
 
 build:
    stage: build
+   variables:
+     SPRING_FLYWAY_ENABLED: "false"
    script:
       - cd backend
       - >
@@ -28,6 +30,8 @@ build:
 
 sonarqube-backend-sast:
   stage: test
+  variables:
+    SPRING_FLYWAY_ENABLED: "false"
   image: maven:3.8-openjdk-16
   script:
     - cd backend
@@ -78,12 +82,14 @@ deploy:
      #копирование unit-файла
      - scp ./backend/backend.service ${DEV_USER}@${DEV_HOST}:/home/${DEV_USER}/backend.service
      #запуск скрипта
-     - ssh ${DEV_USER}@${DEV_HOST} "export "CURRENT_VERSION=${VERSION}"; export "VERSION=${VERSION}"; export "DEV_HOST=${DEV_HOST}"; export "NEXUS_REPO_URL=${NEXUS_REPO_URL}"; export "NEXUS_REPO_USER=${NEXUS_REPO_USER}"; export "NEXUS_REPO_PASS=${NEXUS_REPO_PASS}"; export "NEXUS_REPO_BACKEND_NAME=${NEXUS_REPO_BACKEND_NAME}"; setsid /bin/bash -s " < ./backend/deploy.sh
+     - ssh ${DEV_USER}@${DEV_HOST} "export "CURRENT_VERSION=${VERSION}"; export "VERSION=${VERSION}"; export "DEV_HOST=${DEV_HOST}"; export "NEXUS_REPO_URL=${NEXUS_REPO_URL}"; export "NEXUS_REPO_USER=${NEXUS_REPO_USER}"; export "NEXUS_REPO_PASS=${NEXUS_REPO_PASS}"; export "NEXUS_REPO_BACKEND_NAME=${NEXUS_REPO_BACKEND_NAME}"; export "flyway_password=${flyway_password}"; export "flyway_user=${flyway_user}"; setsid /bin/bash -s " < ./backend/deploy.sh
   environment:
     name: backend
     url: http://std-030-13.praktikum-services.tech/
-  rules:
-    - when: manual # Специальное условие, требующее ручного нажатия для установки на виртуальную машину нового обновления
+#  rules:
+#    - when: manual # Специальное условие, требующее ручного нажатия для установки на виртуальную машину нового обновления
+
+
 
   needs:
     - sonarqube-backend-sast
