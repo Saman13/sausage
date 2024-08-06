@@ -94,6 +94,7 @@ deploy:
   needs:
 #    - sonarqube-backend-sast
     - gitlab-sast
+    - release
 
 
 telegram-notification-backend:
