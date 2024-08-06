@@ -27,7 +27,7 @@ Environment=SPRING_DATASOURCE_PASSWORD="${PSQL_PASSWORD}"
 
 #Параметры для подключения MongoDB
 Environment=MONGO_USER="std-030-13"
-Environment=MONGO_PASSWORD="Testusr123"
+Environment=MONGO_PASSWORD="Testusr1234"
 Environment=MONGO_HOST="rs01/rc1a-3nb7p7jsmbup6crt.mdb.yandexcloud.net:27018"
 Environment=MONGO_DATABASE="std-030-13"
 
