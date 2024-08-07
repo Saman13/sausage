@@ -10,7 +10,7 @@ Restart=always
 WorkingDirectory=/var/sausage-store/
 Environment=LOG_PATH=/var/sausage-store/
 Environment=REPORT_PATH=/var/sausage-store/reports/
-EnvironmentFile=/opt/sausage-store/bin/backend.env
+EnvironmentFile=/home/student/backend.env
 
 # подставьте значения переменных
 Environment=PSQL_USER="${DB_USER}"
