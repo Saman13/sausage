@@ -10,10 +10,11 @@ Restart=always
 WorkingDirectory=/var/sausage-store/
 Environment=LOG_PATH=/var/sausage-store/
 Environment=REPORT_PATH=/var/sausage-store/reports/
+EnvironmentFile=/opt/sausage-store/bin/backend.env
 
 # подставьте значения переменных
-Environment=PSQL_USER="std-030-13"
-Environment=PSQL_PASSWORD="Testusr1234"
+Environment=PSQL_USER="${DB_USER}"
+Environment=PSQL_PASSWORD="${DB_PASS}"
 Environment=PSQL_HOST="rc1a-kylrrnh13yjqhvlv.mdb.yandexcloud.net"
 Environment=PSQL_DBNAME="std-030-13"
 Environment=PSQL_PORT="6432"
@@ -25,14 +26,14 @@ Environment=SPRING_DATASOURCE_PASSWORD="${PSQL_PASSWORD}"
 
 
 #Параметры для подключения MongoDB
-Environment=MONGO_USER="std-030-13"
-Environment=MONGO_PASSWORD="Testusr1234"
+Environment=MONGO_USER="${DB_USER}"
+Environment=MONGO_PASSWORD="${DB_PASS}"
 Environment=MONGO_HOST="rc1a-3nb7p7jsmbup6crt.mdb.yandexcloud.net"
 Environment=MONGO_DATABASE="std-030-13"
 
 Environment=SPRING_DATA_MONGODB_URI="mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:27018/${MONGO_DATABASE}?tls=true"
 
-ExecStart=/usr/lib/jvm/java-16-openjdk-amd64/bin/java -Djavax.net.ssl.trustStore=/var/sausage-store/YATrustStore -Djavax.net.ssl.trustStorePassword=superpass -jar /opt/sausage-store/bin/sausage-store.jar
+ExecStart=/usr/lib/jvm/java-16-openjdk-amd64/bin/java -Djavax.net.ssl.trustStore=/etc/ssl/certs/java/cacerts -Djavax.net.ssl.trustStorePassword=changeit -jar /opt/sausage-store/bin/sausage-store.jar
 
 [Install]
 WantedBy=multi-user.target
