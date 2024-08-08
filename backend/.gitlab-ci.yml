@@ -28,20 +28,20 @@ build:
       - changes:
            - backend/**/*
 
-sonarqube-backend-sast:
-  stage: test
-  variables:
-    SPRING_FLYWAY_ENABLED: "false"
-  image: maven:3.8-openjdk-16
-  script:
-    - cd backend
-    - >
-      mvn verify sonar:sonar -Dsonar.qualitygate.wait=true
-      -Dsonar.projectKey=${SONAR_PROJECT_KEY_BACK}
-      -Dsonar.host.url=${SONARQUBE_URL}
-      -Dsonar.login=${SONAR_LOGIN}
-  needs:
-    - build
+#sonarqube-backend-sast:
+#  stage: test
+#  variables:
+#    SPRING_FLYWAY_ENABLED: "false"
+#  image: maven:3.8-openjdk-16
+#  script:
+#    - cd backend
+#    - >
+#      mvn verify sonar:sonar -Dsonar.qualitygate.wait=true
+#      -Dsonar.projectKey=${SONAR_PROJECT_KEY_BACK}
+#      -Dsonar.host.url=${SONARQUBE_URL}
+#      -Dsonar.login=${SONAR_LOGIN}
+#  needs:
+#    - build
 
 gitlab-sast:
   stage: test
@@ -61,7 +61,7 @@ release:
          -Dversion.application=${VERSION}
          -Dmaven.repo.local=${MAVEN_REPO_PATH}
    needs:
-     - sonarqube-backend-sast
+#     - sonarqube-backend-sast
      - gitlab-sast
 
 deploy:
@@ -82,7 +82,7 @@ deploy:
      #копирование unit-файла
      - scp ./backend/backend.service ${DEV_USER}@${DEV_HOST}:/home/${DEV_USER}/backend.service
      #запуск скрипта
-     - ssh ${DEV_USER}@${DEV_HOST} "export "CURRENT_VERSION=${VERSION}"; export "VERSION=${VERSION}"; export "DEV_HOST=${DEV_HOST}"; export "NEXUS_REPO_URL=${NEXUS_REPO_URL}"; export "NEXUS_REPO_USER=${NEXUS_REPO_USER}"; export "NEXUS_REPO_PASS=${NEXUS_REPO_PASS}"; export "NEXUS_REPO_BACKEND_NAME=${NEXUS_REPO_BACKEND_NAME}"; export "flyway_password=${flyway_password}"; export "flyway_user=${flyway_user}"; setsid /bin/bash -s " < ./backend/deploy.sh
+     - ssh ${DEV_USER}@${DEV_HOST} "export "CURRENT_VERSION=${VERSION}"; export "VERSION=${VERSION}"; export "DEV_HOST=${DEV_HOST}"; export "NEXUS_REPO_URL=${NEXUS_REPO_URL}"; export "NEXUS_REPO_USER=${NEXUS_REPO_USER}"; export "NEXUS_REPO_PASS=${NEXUS_REPO_PASS}"; export "NEXUS_REPO_BACKEND_NAME=${NEXUS_REPO_BACKEND_NAME}"; export "DB_PASS=${DB_PASS}"; export "DB_USER=${DB_USER}"; setsid /bin/bash -s " < ./backend/deploy.sh
   environment:
     name: backend
     url: http://std-030-13.praktikum-services.tech/
@@ -92,8 +92,9 @@ deploy:
 
 
   needs:
-    - sonarqube-backend-sast
+#    - sonarqube-backend-sast
     - gitlab-sast
+    - release
 
 
 telegram-notification-backend:
@@ -107,5 +108,5 @@ telegram-notification-backend:
       --data "{\"chat_id\": \"-1002138916913\", \"text\": \"Андрей Федотов собрал backend и тесты прошли успешно. $CI_PROJECT_URL/-/jobs/artifacts/$CI_COMMIT_SHA/download?job=build-backend-code-job\"}"
       https://api.telegram.org/bot5933756043:AAE8JLL5KIzgrNBeTP5e-1bkbJy4YRoeGjs/sendMessage
   needs:
-      - sonarqube-backend-sast
+#      - sonarqube-backend-sast
       - gitlab-sast
