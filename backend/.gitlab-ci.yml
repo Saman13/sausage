@@ -96,7 +96,6 @@ deploy:
   needs:
     - release
 
-
 telegram-notification-backend:
   stage: notify
   only:
