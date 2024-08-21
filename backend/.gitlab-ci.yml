@@ -77,7 +77,7 @@ release:
 
 deploy-backend:
   stage: deploy
-  image: alpine:3.18
+  image: ubuntu:22.04
   script:
     - apk add --no-cache openssh-client bash
     - eval $(ssh-agent -s)
