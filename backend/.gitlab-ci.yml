@@ -90,8 +90,8 @@ deploy-backend:
   script:
     - ./backend/deploy.sh
   environment:
-    name: backend
-    url: http://std-030-13.praktikum-services.tech/
+    name: review/$CI_COMMIT_REF_NAME
+    url: http://${DEV_HOST}:8080
   needs:
      - build
 
