@@ -63,13 +63,14 @@ gitlab-sast:
 
 
 release:
+  stage: release
   variables:
     GIT_STRATEGY: none
   image:
     name: gcr.io/go-containerregistry/crane:debug
     entrypoint: [ "" ]
   cache: [ ]
-  stage: release
+
   before_script:
     - crane auth login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
@@ -93,7 +94,7 @@ deploy-backend:
     name: review/$CI_COMMIT_REF_NAME
     url: http://${DEV_HOST}:8080
   needs:
-     - build
+     - release
 
 telegram-notification-backend:
   stage: notify
