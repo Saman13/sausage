@@ -79,7 +79,7 @@ deploy-backend:
   stage: deploy
   image: ubuntu:22.04
   script:
-    - apt install --no-cache openssh-client bash
+    - apt install openssh-client bash
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
