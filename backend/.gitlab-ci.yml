@@ -15,18 +15,22 @@ stages:
    - deploy
 
 build:
-   stage: build
-   variables:
-     SPRING_FLYWAY_ENABLED: "false"
-   script:
-      - cd backend
-      - >
-         mvn package
-         -Dversion.application=${VERSION}
-         -Dmaven.repo.local=${MAVEN_REPO_PATH}
-   rules: # rules и only в данных случаях взаимозаменяемы
-      - changes:
-           - backend/**/*
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.9.0-debug #kaniko служит для билда образа
+    entrypoint: [""]
+  # переменные CI_REGISTRY_USER, CI_REGISTRY_PASSWORD, CI_REGISTRY генерятся Гитлабом, их задавать не надо
+  script:
+    - echo "test"
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}/backend"
+      --dockerfile "${CI_PROJECT_DIR}/backend/Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}/sausage-backend:$CI_COMMIT_SHA"
+      --build-arg VERSION=$VERSION
+      --cache=true
+  rules: # rules и only в данных случаях взаимозаменяемы
+    - changes:
+      - backend/**/*
 
 sonarqube-backend-sast:
   stage: test
@@ -59,42 +63,33 @@ gitlab-sast:
 
 
 release:
-   stage: release
-   script:
-      - cd backend
-      - >
-         mvn deploy -DskipTests -s settings.xml
-         -Dversion.application=${VERSION}
-         -Dmaven.repo.local=${MAVEN_REPO_PATH}
-   needs:
-     - build
+  variables:
+    GIT_STRATEGY: none
+  image:
+    name: gcr.io/go-containerregistry/crane:debug
+    entrypoint: [ "" ]
+  cache: [ ]
+  stage: release
+  before_script:
+    - crane auth login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - crane tag $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA $VERSION
 
 deploy:
   stage: deploy
+  image: alpine:3.18
   before_script:
-    #устанавливаем ssh-agent для удобства аутентификации по ssh
-    - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
+    - apk add openssh-client bash
     - eval $(ssh-agent -s)
-    #сохраняем сгенеренный ранее приватный ключ для раннера
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
-    - chmod 600 ~/.ssh
+    - chmod 700 ~/.ssh
     - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
-  script:
-     #выполняем простую команду для проверки
-     - ssh ${DEV_USER}@${DEV_HOST} "id"
-     #копирование unit-файла
-     - scp ./backend/backend.service ${DEV_USER}@${DEV_HOST}:/home/${DEV_USER}/backend.service
-     #запуск скрипта
-     - ssh ${DEV_USER}@${DEV_HOST} "export "CURRENT_VERSION=${VERSION}"; export "VERSION=${VERSION}"; export "DEV_HOST=${DEV_HOST}"; export "NEXUS_REPO_URL=${NEXUS_REPO_URL}"; export "NEXUS_REPO_USER=${NEXUS_REPO_USER}"; export "NEXUS_REPO_PASS=${NEXUS_REPO_PASS}"; export "NEXUS_REPO_BACKEND_NAME=${NEXUS_REPO_BACKEND_NAME}"; export "DB_PASS=${DB_PASS}"; export "DB_USER=${DB_USER}"; setsid /bin/bash -s " < ./backend/deploy.sh
-  environment:
-    name: backend
-    url: http://std-030-13.praktikum-services.tech/
-#  rules:
-#    - when: manual # Специальное условие, требующее ручного нажатия для установки на виртуальную машину нового обновления
+# подставим переменные в скрипт deploy.sh и выполним его на целевом хосте, где развернем сосисочный бэкенд
+    - envsubst < ./backend/deploy.sh|ssh ${DEPLOY_USER}@${DEPLOY_HOST}
   needs:
-    - release
+     - build
 
 telegram-notification-backend:
   stage: notify

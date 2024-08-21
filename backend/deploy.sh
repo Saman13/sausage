@@ -1,18 +1,17 @@
 #! /bin/bash
-#Если свалится одна из команд, рухнет и весь скрипт
+#остановим скрипт в случае ошибок
 set -xe
-#Перезаливаем дескриптор сервиса на ВМ для деплоя
-sudo cp -rf backend.service /etc/systemd/system/backend.service
-sudo rm -f /home/student/sausage-store.jar||true
-sudo rm -f /opt/sausage-store/bin/sausage-store.jar||true
-#создадим файл с переменными
-sudo rm -f /home/student/backend.env||true
-sudo echo DB_PASS=${DB_PASS} > /home/student/backend.env
-sudo echo DB_USER=${DB_USER} >> /home/student//backend.env
-#Переносим артефакт в нужную папку
-sudo curl -u ${NEXUS_REPO_USER}:${NEXUS_REPO_PASS} -o sausage-store.jar ${NEXUS_REPO_URL}/repository/${NEXUS_REPO_BACKEND_NAME}/com/yandex/practicum/devops/sausage-store/${VERSION}/sausage-store-${VERSION}.jar
-sudo cp ./sausage-store.jar /opt/sausage-store/bin/sausage-store.jar||true #"<...>||true" говорит, если команда обвалится — продолжай
-#Обновляем конфиг systemd с помощью рестарта
-sudo systemctl daemon-reload
-#Перезапускаем сервис сосисочной
-sudo systemctl restart backend
+#логинимнся на докер реджистори
+sudo docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
+#создаем сеть
+sudo docker network create -d bridge sausage_network || true
+#удаляем старый образ
+sudo docker rm -f sausage-backend || true
+#запускаем контейнер с переменными
+sudo docker run --rm -d --name sausage-backend \
+     --env SPRING_DATASOURCE_URL="jdbc:postgresql://${PSQL_HOST}:${PSQL_PORT}/${PSQL_DBNAME}?ssl=true" \
+     --env SPRING_DATASOURCE_USERNAME="${PSQL_USER}" \
+     --env SPRING_DATASOURCE_PASSWORD="${PSQL_PASSWORD}" \
+     --env SPRING_DATA_MONGODB_URI="mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:27018/${MONGO_DATABASE}?tls=true" \
+     --network=sausage_network \
+     "${CI_REGISTRY_IMAGE}"/sausage-backend:${VERSION}
