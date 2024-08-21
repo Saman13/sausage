@@ -75,11 +75,11 @@ release:
   script:
     - crane tag $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA $VERSION
 
-deploy:
-  image: alpine:3.18
+deploy-backend:
   stage: deploy
+  image: alpine:3.18
   before_script:
-    - apk add openssh-client bash
+    - apk add --no-cache openssh-client bash
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
