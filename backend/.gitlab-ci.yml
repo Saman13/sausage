@@ -78,7 +78,7 @@ release:
 deploy-backend:
   stage: deploy
   image: alpine:3.18
-  before_script:
+  script:
     - apk add --no-cache openssh-client bash
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
@@ -86,7 +86,6 @@ deploy-backend:
     - chmod 700 ~/.ssh
     - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
-  script:
     - sed "s|\$DEPLOY_USER|$DEPLOY_USER|g; s|\$DEPLOY_HOST|$DEPLOY_HOST|g" ./backend/deploy.sh | ssh ${DEPLOY_USER}@${DEPLOY_HOST}
   environment:
     name: backend
