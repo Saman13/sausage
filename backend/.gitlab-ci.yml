@@ -79,7 +79,7 @@ release:
 deploy-backend:
   stage: deploy
   image: debian:latest
-  before_script:
+  script:
     - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install -y openssh-client gettext-base)'
     - eval $(ssh-agent -s)
     - echo "${SSH_PRIVATE_KEY}" | tr -d '\r' | ssh-add -
@@ -87,9 +87,8 @@ deploy-backend:
     - chmod 600 ~/.ssh
     - echo "${SSH_KNOWN_HOSTS}" >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
-    - envsubst < ./backend/deploy.sh | ssh ${DEPLOY_USER}@${DEPLOY_HOST}
-  script:
-    - ./backend/deploy.sh
+    - envsubst < ./backend/deploy.sh | ssh ${DEPLOY_USER}@${DEPLOY_HOST} 'bash -s'
+
   environment:
     name: review/$CI_COMMIT_REF_NAME
     url: http://${DEV_HOST}:8080
