@@ -80,7 +80,7 @@ deploy-fronted:
     - chmod 644 ~/.ssh/known_hosts
     - ssh ${DEPLOY_USER}@${DEPLOY_HOST} "mkdir -p /tmp/${CI_PROJECT_DIR}/frontend/"
     - scp ./frontend/default.conf ${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/${CI_PROJECT_DIR}/frontend/default.conf
-    - envsubst < ./backend/deploy.sh | ssh ${DEPLOY_USER}@${DEPLOY_HOST} 'bash -s'
+    - envsubst < ./frontend/deploy.sh | ssh ${DEPLOY_USER}@${DEPLOY_HOST} 'bash -s'
   environment:
     name: review/$CI_COMMIT_REF_NAME
     url: http://${DEV_HOST}:80
