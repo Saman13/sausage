@@ -63,14 +63,10 @@ release:
     name: gcr.io/go-containerregistry/crane:debug
     entrypoint: [ "" ]
   cache: [ ]
-
   before_script:
     - crane auth login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     - crane tag $CI_REGISTRY_IMAGE/sausage-backend:$CI_COMMIT_SHA $VERSION
-  needs:
-    - sonarqube-frontend-sast
-    - gitlab-sast
 
 deploy-fronted:
   stage: deploy
@@ -91,14 +87,6 @@ deploy-fronted:
     url: http://${DEV_HOST}:80
   needs:
      - release
-deploy:
-  stage: deploy
-  before_script:
-  script:
-    #выполняем простую команду для проверки
-    - ssh ${DEV_USER}@${DEV_HOST} "id"
-    #запуск скрипта
-    - ssh ${DEV_USER}@${DEV_HOST} "export "CURRENT_VERSION=${VERSION}"; export "VERSION=${VERSION}"; export "DEV_HOST=${DEV_HOST}"; export "NEXUS_REPO_URL=${NEXUS_REPO_URL}"; export "NEXUS_REPO_USER=${NEXUS_REPO_USER}"; export "NEXUS_REPO_PASS=${NEXUS_REPO_PASS}"; export "NEXUS_REPO_FRONTEND_NAME=${NEXUS_REPO_FRONTEND_NAME}"; setsid /bin/bash -s " < ./frontend/deploy.sh
 
 telegram-notification-frontend:
   stage: notify
