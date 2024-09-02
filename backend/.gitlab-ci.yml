@@ -34,9 +34,6 @@ build:
 
 sonarqube-backend-sast:
   stage: test
-  cache:
-    key: ${CI_JOB_NAME}
-    paths: [ ]
   variables:
     SPRING_FLYWAY_ENABLED: "false"
   image: maven:3.8-openjdk-16
@@ -52,12 +49,12 @@ sonarqube-backend-sast:
   only:
     variables:
       - $CI_COMMIT_MESSAGE =~ /get test/
-
-gitlab-sast:
-  stage: test
   cache:
     key: ${CI_JOB_NAME}
     paths: [ ]
+
+gitlab-sast:
+  stage: test
   trigger:
     include:
       - template: Security/SAST.gitlab-ci.yml
@@ -66,7 +63,9 @@ gitlab-sast:
   only:
     variables:
       - $CI_COMMIT_MESSAGE =~ /get test/
-
+  cache:
+    key: ${CI_JOB_NAME}
+    paths: [ ]
 
 release:
   stage: release
