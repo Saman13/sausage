@@ -10,7 +10,7 @@ sudo docker rm -f sausage-frontend || true
 #запускаем контейнер с переменными
 sudo docker run -d --name sausage-frontend \
      --network=sausage_network \
-     --restart=on-failure:10 \
+     --restart unless-stopped \
      -v /tmp/${CI_PROJECT_DIR}/frontend/default.conf:/etc/nginx/conf.d/default.conf \
      -p 80:80 \
      "${CI_REGISTRY_IMAGE}"/sausage-frontend:${VERSION}
