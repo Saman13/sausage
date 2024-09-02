@@ -29,23 +29,20 @@ build:
 # Запуск проверки сонаром
 sonarqube-frontend-sast:
   stage: test
-  variables:
-    SPRING_FLYWAY_ENABLED: "false"
-  cache:
-    key: ${CI_JOB_NAME}
-    paths: [ ]
   script:
-    - echo "SONAR_PROJECT_KEY_FRONTEND=${SONAR_PROJECT_KEY_FRONTEND}"
     - unset SPRING_DATASOURCE_URL
     - unset SPRING_DATASOURCE_USERNAME
     - unset SPRING_DATASOURCE_PASSWORD
     - cd frontend
     - npm install -g sonarqube-scanner
     - >
-      sonar-scanner -Dsonar.projectKey=${SONAR_PROJECT_KEY_FRONTEND}
+      sonar-scanner -Dsonar.projectKey=${SONAR_PROJECT_KEY_FRONT}
       -Dsonar.sources=.
       -Dsonar.host.url=${SONARQUBE_URL}
       -Dsonar.login=${SONAR_LOGIN}
+  cache:
+    key: ${CI_JOB_NAME}
+    paths: [ ]
 
   needs:
     - build
