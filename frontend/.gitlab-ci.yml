@@ -29,6 +29,9 @@ build:
 # Запуск проверки сонаром
 sonarqube-frontend-sast:
   stage: test
+  cache:
+    key: ${CI_JOB_NAME}
+    paths: [ ]
   script:
     - cd frontend
     - npm install -g sonarqube-scanner
@@ -37,14 +40,15 @@ sonarqube-frontend-sast:
       -Dsonar.sources=.
       -Dsonar.host.url=${SONARQUBE_URL}
       -Dsonar.login=${SONAR_LOGIN}
+
   needs:
     - build
   only:
     variables:
       - $CI_COMMIT_MESSAGE =~ /get test/
-  cache:
-    key: ${CI_JOB_NAME}
-    paths: [ ]
+      - unset SPRING_DATASOURCE_URL
+      - unset SPRING_DATASOURCE_USERNAME
+      - unset SPRING_DATASOURCE_PASSWORD
 
 gitlab-sast:
   stage: test
