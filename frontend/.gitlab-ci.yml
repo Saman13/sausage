@@ -73,6 +73,7 @@ release:
     - crane auth login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     - crane tag $CI_REGISTRY_IMAGE/sausage-frontend:$CI_COMMIT_SHA $VERSION
+  when: manual
 
 deploy-fronted:
   stage: deploy
@@ -86,7 +87,7 @@ deploy-fronted:
     - echo "${SSH_KNOWN_HOSTS}" >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
     - ssh ${DEPLOY_USER}@${DEPLOY_HOST} "mkdir -p /tmp/${CI_PROJECT_DIR}/frontend/"
-    - scp ./frontend/default.conf ${DEPLOY_USER}@${DEPLOY_HOST}:/tmp${CI_PROJECT_DIR}/frontend/default.conf
+    - scp ./frontend/default.conf ${DEPLOY_USER}@${DEPLOY_HOST}:/tmp/${CI_PROJECT_DIR}/frontend/default.conf
     - envsubst < ./frontend/deploy.sh | ssh ${DEPLOY_USER}@${DEPLOY_HOST} 'bash -s'
   environment:
     name: review/$CI_COMMIT_REF_NAME
