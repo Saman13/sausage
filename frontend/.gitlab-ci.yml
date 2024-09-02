@@ -87,8 +87,8 @@ deploy-fronted:
     - echo "${SSH_KNOWN_HOSTS}" >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
     - echo CI_PROJECT_DIR=${CI_PROJECT_DIR}
-    - ssh ${DEPLOY_USER}@${DEPLOY_HOST} "mkdir -p /tmp${CI_PROJECT_DIR}/frontend/"
-    - scp -v ./frontend/default.conf ${DEPLOY_USER}@${DEPLOY_HOST}:/tmp${CI_PROJECT_DIR}/frontend/default.conf
+    - ssh ${DEPLOY_USER}@${DEPLOY_HOST} "sudo mkdir -p /tmp${CI_PROJECT_DIR}/frontend/"
+    - scp ./frontend/default.conf ${DEPLOY_USER}@${DEPLOY_HOST}:/tmp${CI_PROJECT_DIR}/frontend/default.conf
     - envsubst < ./frontend/deploy.sh | ssh ${DEPLOY_USER}@${DEPLOY_HOST} 'bash -s'
   environment:
     name: review/$CI_COMMIT_REF_NAME
