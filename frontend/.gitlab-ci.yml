@@ -35,6 +35,9 @@ sonarqube-frontend-sast:
     key: ${CI_JOB_NAME}
     paths: [ ]
   script:
+    - unset SPRING_DATASOURCE_URL
+    - unset SPRING_DATASOURCE_USERNAME
+    - unset SPRING_DATASOURCE_PASSWORD
     - cd frontend
     - npm install -g sonarqube-scanner
     - >
