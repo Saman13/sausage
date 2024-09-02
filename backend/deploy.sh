@@ -9,7 +9,8 @@ sudo docker network create -d bridge sausage_network || true
 #удаляем старый образ
 sudo docker rm -f sausage-backend || true
 #запускаем контейнер с переменными
-sudo docker run --rm -d --name sausage-backend \
+sudo docker run -d --name sausage-backend \
+     --restart unless-stopped \
      --env SPRING_DATASOURCE_URL="jdbc:postgresql://rc1a-kylrrnh13yjqhvlv.mdb.yandexcloud.net:6432/std-030-13?ssl=true" \
      --env SPRING_DATASOURCE_USERNAME="${DB_USER}" \
      --env SPRING_DATASOURCE_PASSWORD="${DB_PASS}" \
