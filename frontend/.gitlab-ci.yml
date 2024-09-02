@@ -29,6 +29,8 @@ build:
 # Запуск проверки сонаром
 sonarqube-frontend-sast:
   stage: test
+  variables:
+    SPRING_FLYWAY_ENABLED: "false"
   cache:
     key: ${CI_JOB_NAME}
     paths: [ ]
@@ -46,9 +48,6 @@ sonarqube-frontend-sast:
   only:
     variables:
       - $CI_COMMIT_MESSAGE =~ /get test/
-      - unset SPRING_DATASOURCE_URL
-      - unset SPRING_DATASOURCE_USERNAME
-      - unset SPRING_DATASOURCE_PASSWORD
 
 gitlab-sast:
   stage: test
