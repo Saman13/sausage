@@ -56,9 +56,6 @@ gitlab-sast:
   only:
     variables:
       - $CI_COMMIT_MESSAGE =~ /get test/
-  cache:
-    key: ${CI_JOB_NAME}
-    paths: [ ]
 
 release:
   stage: release
