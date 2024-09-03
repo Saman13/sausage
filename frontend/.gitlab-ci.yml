@@ -13,28 +13,42 @@ stages:
    - deploy
 
 build:
-   stage: build
-   script:
-     - cd frontend
-     - npm install
-     - npm run build
-   rules:
-      - changes:
-           - frontend/**/*
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.9.0-debug #kaniko служит для билда образа
+    entrypoint: [ "" ]
+  # переменные CI_REGISTRY_USER, CI_REGISTRY_PASSWORD, CI_REGISTRY генерятся Гитлабом, их задавать не надо
+  script:
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}/frontend"
+      --dockerfile "${CI_PROJECT_DIR}/frontend/Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}/sausage-frontend:$CI_COMMIT_SHA"
+      --build-arg VERSION=$VERSION
+      --cache=true
 
 # Запуск проверки сонаром
 sonarqube-frontend-sast:
   stage: test
   script:
+    - unset SPRING_DATASOURCE_URL
+    - unset SPRING_DATASOURCE_USERNAME
+    - unset SPRING_DATASOURCE_PASSWORD
     - cd frontend
     - npm install -g sonarqube-scanner
     - >
-      sonar-scanner -Dsonar.projectKey=${SONAR_PROJECT_KEY_FRONTEND}
+      sonar-scanner -Dsonar.projectKey=${SONAR_PROJECT_KEY_FRONT}
       -Dsonar.sources=.
       -Dsonar.host.url=${SONARQUBE_URL}
       -Dsonar.login=${SONAR_LOGIN}
+  cache:
+    key: ${CI_JOB_NAME}
+    paths: [ ]
+
   needs:
     - build
+  only:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /get test/
 
 gitlab-sast:
   stage: test
@@ -43,44 +57,43 @@ gitlab-sast:
       - template: Security/SAST.gitlab-ci.yml
   needs:
     - build
+  only:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /get test/
 
 release:
   stage: release
-  script:
-    - cd frontend/dist
-    - tar czvf sausage-store-${VERSION}.tar.gz frontend
-    - >
-      curl -v -u "${NEXUS_REPO_USER}:${NEXUS_REPO_PASS}" --upload-file sausage-store-${VERSION}.tar.gz
-      ${NEXUS_REPO_URL}/repository/${NEXUS_REPO_FRONTEND_NAME}/${VERSION}/sausage-store-${VERSION}.tar.gz
-  needs:
-    - sonarqube-frontend-sast
-    - gitlab-sast
-
-deploy:
-  stage: deploy
+  variables:
+    GIT_STRATEGY: none
+  image:
+    name: gcr.io/go-containerregistry/crane:debug
+    entrypoint: [ "" ]
+  cache: [ ]
   before_script:
-    #устанавливаем ssh-agent для удобства аутентификации по ssh
-    - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install openssh-client -y )'
+    - crane auth login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - crane tag $CI_REGISTRY_IMAGE/sausage-frontend:$CI_COMMIT_SHA $VERSION
+  when: manual
+
+deploy-fronted:
+  stage: deploy
+  image: debian:latest
+  script:
+    - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install -y openssh-client gettext-base)'
     - eval $(ssh-agent -s)
-    #сохраняем сгенеренный ранее приватный ключ для раннера
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
+    - echo "${SSH_PRIVATE_KEY}" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
     - chmod 600 ~/.ssh
-    - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+    - echo "${SSH_KNOWN_HOSTS}" >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
-  script:
-    #выполняем простую команду для проверки
-    - ssh ${DEV_USER}@${DEV_HOST} "id"
-    #запуск скрипта
-    - ssh ${DEV_USER}@${DEV_HOST} "export "CURRENT_VERSION=${VERSION}"; export "VERSION=${VERSION}"; export "DEV_HOST=${DEV_HOST}"; export "NEXUS_REPO_URL=${NEXUS_REPO_URL}"; export "NEXUS_REPO_USER=${NEXUS_REPO_USER}"; export "NEXUS_REPO_PASS=${NEXUS_REPO_PASS}"; export "NEXUS_REPO_FRONTEND_NAME=${NEXUS_REPO_FRONTEND_NAME}"; setsid /bin/bash -s " < ./frontend/deploy.sh
+    - ssh ${DEV_USER}@${DEV_HOST} "mkdir -p /tmp/${CI_PROJECT_DIR}/frontend/"
+    - scp -v ./frontend/default.conf ${DEV_USER}@${DEV_HOST}:/tmp/${CI_PROJECT_DIR}/frontend/default.conf
+    - envsubst < ./frontend/deploy.sh | ssh ${DEPLOY_USER}@${DEPLOY_HOST} 'bash -s'
   environment:
-    name: frontend
-    url: http://std-030-13.praktikum-services.tech/
-  rules:
-    - when: manual # Специальное условие, требующее ручного нажатия для установки на виртуальную машину нового обновления
+    name: review/$CI_COMMIT_REF_NAME
+    url: http://${DEV_HOST}:80
   needs:
-      - sonarqube-frontend-sast
-      - gitlab-sast
+     - release
 
 telegram-notification-frontend:
   stage: notify
@@ -98,3 +111,4 @@ telegram-notification-frontend:
   needs:
       - sonarqube-frontend-sast
       - gitlab-sast
+
