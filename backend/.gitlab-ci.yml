@@ -36,7 +36,6 @@ sonarqube-backend-sast:
   stage: test
   variables:
     SPRING_FLYWAY_ENABLED: "false"
-    SPRING_CLOUD_VAULT_ENABLED: "false"
   image: maven:3.8-openjdk-16
   script:
     - cd backend
@@ -81,24 +80,16 @@ release:
 
 deploy-backend:
   stage: deploy
-  image: vault:1.11.3
-  before_script:
-    - apk add openssh-client bash
-    - eval $(ssh-agent -s)
-    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
-    - mkdir -p ~/.ssh
-    - chmod 700 ~/.ssh
-    - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
-    - chmod 644 ~/.ssh/known_hosts
+  image: debian:latest
   script:
-    - export VAULT_TOKEN="$(vault write -field=token auth/jwt/login role=sausage-store jwt=$CI_JOB_JWT)"
-    - ssh ${DEV_USER}@${DEV_HOST}
-      "export "VERSION=${VERSION}";
-       export "SPRING_DATASOURCE_URL=${PSQL_DATASOURCE}";
-       export "SPRING_DATASOURCE_USERNAME=${PSQL_USER}";
-       export "SPRING_DATASOURCE_PASSWORD=$(vault kv get -field=spring.datasource.password secret/sausage-store)";
-       export "SPRING_DATA_MONGODB_URI=${MONGO_DATA}";
-      /bin/bash -s " < ./backend/backend_deploy.sh
+    - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install -y openssh-client gettext-base)'
+    - eval $(ssh-agent -s)
+    - echo "${SSH_PRIVATE_KEY}" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 600 ~/.ssh
+    - echo "${SSH_KNOWN_HOSTS}" >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - envsubst < ./backend/deploy.sh | ssh ${DEPLOY_USER}@${DEPLOY_HOST} 'bash -s'
   environment:
     name: review/$CI_COMMIT_REF_NAME
     url: http://${DEV_HOST}:8080
