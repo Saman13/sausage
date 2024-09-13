@@ -53,7 +53,7 @@ deploy:
   image: docker:24.0.7-alpine3.19
   environment:
     name: production/backend-report
-  when: manual
+#  when: manual
   before_script:
     - apk add openssh-client bash
     - eval $(ssh-agent -s)
