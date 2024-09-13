@@ -48,7 +48,7 @@ release:
     - crane auth login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - crane tag $CI_REGISTRY_IMAGE/sausage-backend-report:$CI_COMMIT_SHA $VERSION
 
-deploy:
+deploy-backend-report:
   stage: deploy
   image: docker:24.0.7-alpine3.19
   environment:
