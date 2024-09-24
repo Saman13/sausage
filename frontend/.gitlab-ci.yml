@@ -116,3 +116,4 @@ telegram-notification-frontend:
       - sonarqube-frontend-sast
       - gitlab-sast
 
+
