@@ -3,7 +3,7 @@ version: "3.3"
 services:
   backend:
     image: gitlab.praktikum-services.ru:5050/std-030-13/sausage/sausage-backend:${VERSION}
-    container_name: backend
+    container_name: sausage-backend
     environment:
       SPRING_DATASOURCE_USERNAME: ${PSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${PSQL_PASSWORD}
@@ -16,7 +16,7 @@ services:
 
   backend-report:
     image: gitlab.praktikum-services.ru:5050/std-030-13/sausage/sausage-backend-report:${VERSION}
-    container_name: backend-report
+    container_name: sausage-backend-report
     restart: always
     environment:
       PORT: 8080
@@ -26,7 +26,7 @@ services:
 
   frontend:
     image: gitlab.praktikum-services.ru:5050/std-030-13/sausage/sausage-frontend:${VERSION}
-    container_name: frontend
+    container_name: sausage-frontend
     restart: always
     ports:
       - "80:80"
