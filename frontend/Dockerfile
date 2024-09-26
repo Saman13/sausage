@@ -11,3 +11,4 @@ COPY default.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /usr/src/app/dist/frontend ./frontend
 EXPOSE 80
 
+
