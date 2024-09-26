@@ -77,23 +77,25 @@ release:
 
 deploy-fronted:
   stage: deploy
-  image: debian:latest
-  script:
-    - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install -y openssh-client gettext-base)'
+  image: docker:24.0.7-alpine3.19
+  environment:
+    name: production/frontend
+#  when: manual
+  before_script:
+    - apk add docker-cli-compose openssh-client bash
     - eval $(ssh-agent -s)
-    - echo "${SSH_PRIVATE_KEY}" | tr -d '\r' | ssh-add -
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
     - chmod 600 ~/.ssh
-    - echo "${SSH_KNOWN_HOSTS}" >> ~/.ssh/known_hosts
+    - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
-    - ssh ${DEV_USER}@${DEV_HOST} "sudo rm -rf /tmp/${CI_PROJECT_DIR}/ || true"
-    - ssh ${DEV_USER}@${DEV_HOST} "sudo mkdir -p /tmp${CI_PROJECT_DIR}/frontend/"
-    - ssh ${DEV_USER}@${DEV_HOST} "sudo chown -R student:student /tmp${CI_PROJECT_DIR}"
-    - scp -v ./frontend/default.conf ${DEV_USER}@${DEV_HOST}:/tmp${CI_PROJECT_DIR}/frontend/
-    - envsubst < ./frontend/deploy.sh | ssh ${DEPLOY_USER}@${DEPLOY_HOST} 'bash -s'
-  environment:
-    name: review/$CI_COMMIT_REF_NAME
-    url: http://${DEV_HOST}:80
+    - docker context create remote --description "remote ssh" --docker "host=ssh://${DEV_USER}@${DEV_HOST}"
+  script:
+    - echo "VERSION=${VERSION}" >> deploy.env
+    - echo "REPORTS_MONGODB_URI="mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:27018/${MONGO_DATABASE}?tls=true"" >> deploy.env
+    - echo "REPORT_PATH=/var/www-data/htdocs" >> deploy.env
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker --context remote compose --env-file deploy.env up frontend -d --pull "always" --force-recreate
   needs:
      - release
 
@@ -113,4 +115,5 @@ telegram-notification-frontend:
   needs:
       - sonarqube-frontend-sast
       - gitlab-sast
+
 
