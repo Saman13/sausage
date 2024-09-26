@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   backend:
-    image: g${CI_REGISTRY_IMAGE}/sausage-backend:${VERSION}
+    image: ${CI_REGISTRY_IMAGE}/sausage-backend:${VERSION}
     environment:
       VIRTUAL_HOST: "backend"
       VIRTUAL_PORT: "8080"
