@@ -2,7 +2,6 @@ from flask import Flask, jsonify
 import os
 import requests
 import pymongo
-import ssl
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask
 
