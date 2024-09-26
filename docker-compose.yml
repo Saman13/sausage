@@ -20,7 +20,7 @@ services:
     restart: always
     environment:
       PORT: 8080
-      DB: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:27018/${MONGO_DATABASE}?tls=true
+      DB: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:27018/${MONGO_DATABASE}?tls=true&tlsAllowInvalidCertificates=true
     networks:
       - sausage-store
 
