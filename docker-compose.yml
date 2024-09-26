@@ -1,10 +1,12 @@
-version: "3.3"
+version: "3.8"
 
 services:
   backend:
-    image: gitlab.praktikum-services.ru:5050/std-030-13/sausage/sausage-backend:${VERSION}
-    container_name: sausage-backend
+    image: g${CI_REGISTRY_IMAGE}/sausage-backend:latest
     environment:
+      VIRTUAL_HOST: "backend"
+      VIRTUAL_PORT: "8080"
+      REPORT_PATH: ${REPORT_PATH}
       SPRING_DATASOURCE_USERNAME: ${PSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${PSQL_PASSWORD}
       SPRING_DATASOURCE_URL: ${PSQL_DATASOURCE}
@@ -15,7 +17,7 @@ services:
       - sausage-store
 
   backend-report:
-    image: gitlab.praktikum-services.ru:5050/std-030-13/sausage/sausage-backend-report:${VERSION}
+    image: ${CI_REGISTRY_IMAGE}/sausage-backend-report:latest
     container_name: sausage-backend-report
     restart: always
     environment:
@@ -25,11 +27,15 @@ services:
       - sausage-store
 
   frontend:
-    image: gitlab.praktikum-services.ru:5050/std-030-13/sausage/sausage-frontend:${VERSION}
+    image: ${CI_REGISTRY_IMAGE}/sausage-frontend:latest
     container_name: sausage-frontend
     restart: always
+    environment:
+      DEFAULT_HOST: "backend"
     ports:
       - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
     networks:
       - sausage-store
 
