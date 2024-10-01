@@ -25,3 +25,4 @@ COPY --chown=jaruser:jaruser \
 EXPOSE 8080
 USER jaruser
 ENTRYPOINT ["java", "-jar", "-Dmyserver.bindPort=8080", "/app/sausage-store.jar"]
+HEALTHCHECK CMD curl --fail -s http://localhost:8080/actuator/health
