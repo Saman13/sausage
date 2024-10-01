@@ -1,8 +1,9 @@
 version: "3.8"
 
 services:
-  backend:
+  backend_green:
     image: ${CI_REGISTRY_IMAGE}/sausage-backend:${VERSION}
+    container_name: green
     environment:
       VIRTUAL_HOST: "backend"
       VIRTUAL_PORT: "8080"
@@ -13,10 +14,36 @@ services:
       SPRING_DATA_MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:27018/${MONGO_DATABASE}?tls=true
       SPRING_FLYWAY_BASELINE-ON-MIGRATE: "true"
     restart: always
-    deploy:
-      replicas: 2
     networks:
       - sausage-store
+    healthcheck:
+      test: curl --fail -s http://localhost:8080/<health check endpoint>
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 6
+
+  backend_blue:
+    image: ${CI_REGISTRY_IMAGE}/sausage-backend:${VERSION}
+    container_name: blue
+    environment:
+      VIRTUAL_HOST: "backend"
+      VIRTUAL_PORT: "8080"
+      REPORT_PATH: ${REPORT_PATH}
+      SPRING_DATASOURCE_USERNAME: ${PSQL_USER}
+      SPRING_DATASOURCE_PASSWORD: ${PSQL_PASSWORD}
+      SPRING_DATASOURCE_URL: ${PSQL_DATASOURCE}
+      SPRING_DATA_MONGODB_URI: mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:27018/${MONGO_DATABASE}?tls=true
+      SPRING_FLYWAY_BASELINE-ON-MIGRATE: "true"
+    restart: always
+    networks:
+      - sausage-store
+    healthcheck:
+      test: curl --fail -s http://localhost:8080/<health check endpoint>
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 6
 
   backend-report:
     image: ${CI_REGISTRY_IMAGE}/sausage-backend-report:${VERSION}

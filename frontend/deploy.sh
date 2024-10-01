@@ -16,3 +16,4 @@ sudo docker run -d --name sausage-frontend \
      "${CI_REGISTRY_IMAGE}"/sausage-frontend:${VERSION}
 
 
+
