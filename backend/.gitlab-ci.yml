@@ -102,8 +102,9 @@ deploy-backend:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - cp backend/deploy.sh ./
     - chmod +x deploy.sh
+#    - docker --context remote compose --env-file deploy.env up backend_green -d --pull "always" --force-recreate
+#    - docker --context remote compose --env-file deploy.env up backend_blue -d --pull "always" --force-recreate
     - ./deploy.sh
-    - docker --context remote compose --env-file deploy.env up backend_green -d --pull "always" --force-recreate
   needs:
      - release
 
