@@ -3,7 +3,7 @@ version: "3.3"
 services:
   backend:
     image: gitlab.praktikum-services.ru:5050/std-030-13/sausage/sausage-backend:${VERSION}
-    container_name: sausage-backend
+    container_name: green
     environment:
       SPRING_DATASOURCE_USERNAME: ${PSQL_USER}
       SPRING_DATASOURCE_PASSWORD: ${PSQL_PASSWORD}
