@@ -1,5 +1,4 @@
 #!/bin/sh
-sleep 21
 
 # Названия контейнеров
 GREEN_CONTAINER="green"
