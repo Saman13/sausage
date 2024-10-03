@@ -28,17 +28,41 @@ blue_running=$(is_container_running $BLUE_CONTAINER)
 
 if [ "$green_running" = "true" ] && [ "$green_status" = "healthy" ]; then
     echo "Green контейнер запущен и работает. Перезапускаем на Blue..."
+    docker run -d --name blue \
+     --restart unless-stopped \
+     --env SPRING_DATASOURCE_URL="jdbc:postgresql://rc1a-kylrrnh13yjqhvlv.mdb.yandexcloud.net:6432/std-030-13?ssl=true" \
+     --env SPRING_DATASOURCE_USERNAME="${DB_USER}" \
+     --env SPRING_DATASOURCE_PASSWORD="${DB_PASS}" \
+     --env SPRING_DATA_MONGODB_URI="mongodb://${DB_USER}:${DB_PASS}@rc1a-3nb7p7jsmbup6crt.mdb.yandexcloud.net:27018/std-030-13?tls=true" \
+     --network=sausage_network \
+     "${CI_REGISTRY_IMAGE}"/sausage-backend:${VERSION}
     docker stop $GREEN_CONTAINER
     docker rm $GREEN_CONTAINER
-    docker --context remote compose --env-file deploy.env up backend_blue -d --pull "always" --force-recreate
+
 elif [ "$blue_running" = "true" ] && [ "$blue_status" = "healthy" ]; then
     echo "Blue контейнер запущен и работает. Перезапускаем на Green..."
+    docker run -d --name green \
+     --restart unless-stopped \
+     --env SPRING_DATASOURCE_URL="jdbc:postgresql://rc1a-kylrrnh13yjqhvlv.mdb.yandexcloud.net:6432/std-030-13?ssl=true" \
+     --env SPRING_DATASOURCE_USERNAME="${DB_USER}" \
+     --env SPRING_DATASOURCE_PASSWORD="${DB_PASS}" \
+     --env SPRING_DATA_MONGODB_URI="mongodb://${DB_USER}:${DB_PASS}@rc1a-3nb7p7jsmbup6crt.mdb.yandexcloud.net:27018/std-030-13?tls=true" \
+     --network=sausage_network \
+     "${CI_REGISTRY_IMAGE}"/sausage-backend:${VERSION}
     docker stop $BLUE_CONTAINER
     docker rm $BLUE_CONTAINER
-    docker --context remote compose --env-file deploy.env up backend_green -d --pull "always" --force-recreate
+
 elif [ "$green_running" = "false" ] && [ "$blue_running" = "false" ]; then
     echo "Ни один контейнер не запущен. Запускаем Green..."
-    docker --context remote compose --env-file deploy.env up backend_green -d --pull "always" --force-recreate
+    docker run -d --name green \
+     --restart unless-stopped \
+     --env SPRING_DATASOURCE_URL="jdbc:postgresql://rc1a-kylrrnh13yjqhvlv.mdb.yandexcloud.net:6432/std-030-13?ssl=true" \
+     --env SPRING_DATASOURCE_USERNAME="${DB_USER}" \
+     --env SPRING_DATASOURCE_PASSWORD="${DB_PASS}" \
+     --env SPRING_DATA_MONGODB_URI="mongodb://${DB_USER}:${DB_PASS}@rc1a-3nb7p7jsmbup6crt.mdb.yandexcloud.net:27018/std-030-13?tls=true" \
+     --network=sausage_network \
+     "${CI_REGISTRY_IMAGE}"/sausage-backend:${VERSION}
+
 elif [ "$green_running" = "true" ] && [ "$blue_running" = "true" ]; then
     echo "Оба контейнера запущены. Останавливаем Blue..."
     docker stop $BLUE_CONTAINER

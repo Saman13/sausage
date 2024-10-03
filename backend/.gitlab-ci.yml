@@ -99,8 +99,8 @@ deploy-backend:
     - echo "SPRING_DATASOURCE_PASSWORD=${PSQL_PASSWORD}" >> deploy.env
     - echo "REPORTS_MONGODB_URI="mongodb://${MONGO_USER}:${MONGO_PASSWORD}@${MONGO_HOST}:27018/${MONGO_DATABASE}?tls=true"" >> deploy.env
     - echo "REPORT_PATH=/var/www-data/htdocs" >> deploy.env
+    - envsubst < ./backend/deploy.sh | ssh ${DEPLOY_USER}@${DEPLOY_HOST} 'bash -s'
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - cp backend/deploy.sh ./
     - chmod +x deploy.sh
     - docker pull "${CI_REGISTRY_IMAGE}"/sausage-backend:${VERSION}
 #    - docker --context remote compose --env-file deploy.env up backend_green -d --pull "always" --force-recreate
