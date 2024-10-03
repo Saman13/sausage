@@ -37,13 +37,16 @@ elif [ "$blue_running" = "true" ] && [ "$blue_status" = "healthy" ]; then
     docker stop $BLUE_CONTAINER
     docker rm $BLUE_CONTAINER
 
-elif
+elif [ "$green_running" = "false" ] && [ "$blue_running" = "false" ]; then
+    echo "Ни один контейнер не запущен. Запускаем Green..."
+    docker --context remote compose --env-file deploy.env up backend_green -d --pull "always" --force-recreate
+
 elif [ "$green_running" = "true" ] && [ "$blue_running" = "true" ]; then
     echo "Оба контейнера запущены. Останавливаем Blue..."
     docker stop $BLUE_CONTAINER
     docker rm $BLUE_CONTAINER
-else [ "$green_running" = "false" ] && [ "$blue_running" = "false" ]; then
-    echo "Ни один контейнер не запущен. Запускаем Green..."
+else
+    echo "Состояние контейнеров не определено. Запускаем green."
     docker --context remote compose --env-file deploy.env up backend_green -d --pull "always" --force-recreate
 fi
 
