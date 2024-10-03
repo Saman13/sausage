@@ -86,7 +86,7 @@ deploy-backend:
     name: production/backend
 #  when: manual
   before_script:
-    - apk add docker-cli-compose openssh-client
+    - 'command -v ssh-agent >/dev/null || ( apt-get update -y && apt-get install -y openssh-client gettext-base)'
     - eval $(ssh-agent -s)
     - echo "$SSH_PRIVATE_KEY"| tr -d '\r' | ssh-add -
     - mkdir -p ~/.ssh
