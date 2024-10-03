@@ -102,9 +102,9 @@ deploy-backend:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - cp backend/deploy.sh ./
     - chmod +x deploy.sh
+    - docker pull gitlab.praktikum-services.ru:5050/std-030-13/sausage/sausage-backend:latest
 #    - docker --context remote compose --env-file deploy.env up backend_green -d --pull "always" --force-recreate
 #    - docker --context remote compose --env-file deploy.env up backend_blue -d --pull "always" --force-recreate
-    - sleep 21
     - ./deploy.sh
   needs:
      - release
