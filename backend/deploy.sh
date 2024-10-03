@@ -70,3 +70,4 @@ elif [ "$green_running" = "true" ] && [ "$blue_running" = "true" ]; then
 else
     echo "Состояние контейнеров не определено. Попробуйте вручную."
 fi
+

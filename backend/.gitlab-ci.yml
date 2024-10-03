@@ -80,7 +80,8 @@ release:
 
 deploy-backend:
   stage: deploy
-  image: docker:24.0.7-alpine3.19
+#  image: docker:24.0.7-alpine3.19
+  image: debian:latest
   environment:
     name: production/backend
 #  when: manual
