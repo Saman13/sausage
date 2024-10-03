@@ -101,7 +101,7 @@ deploy-backend:
     - echo "REPORT_PATH=/var/www-data/htdocs" >> deploy.env
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - chmod +x backend/deploy.sh
-    - ./deploy.sh
+    - ./backend/deploy.sh
   needs:
      - release
 
