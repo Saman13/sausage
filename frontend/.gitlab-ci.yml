@@ -73,14 +73,12 @@ release:
     - crane auth login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     - crane tag $CI_REGISTRY_IMAGE/sausage-frontend:$CI_COMMIT_SHA $VERSION
-  when: manual
 
 deploy-fronted:
   stage: deploy
   image: docker:24.0.7-alpine3.19
   environment:
     name: production/frontend
-#  when: manual
   before_script:
     - apk add docker-cli-compose openssh-client bash
     - eval $(ssh-agent -s)
@@ -99,6 +97,8 @@ deploy-fronted:
     - docker --context remote compose --env-file deploy.env up frontend -d --pull "always" --force-recreate
   needs:
      - release
+  when: manual
+
 
 telegram-notification-frontend:
   stage: notify

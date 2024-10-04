@@ -35,6 +35,9 @@ semgrep-sast:
     MAVEN_REPO_PATH: ${CI_PROJECT_DIR}/.m2/repository
   dependencies:
     - build
+  only:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /get test/
 
 release:
   variables:
