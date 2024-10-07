@@ -1,19 +1,32 @@
-#! /bin/bash
-#остановим скрипт в случае ошибок
-set -xe
-#логинимнся на докер реджистори
-echo ${CI_REGISTRY_USER} ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
-sudo docker login -u ${CI_REGISTRY_USER} -p ${CI_REGISTRY_PASSWORD} ${CI_REGISTRY}
-#создаем сеть
-sudo docker network create -d bridge sausage_network || true
-#удаляем старый образ
-sudo docker rm -f sausage-backend || true
-#запускаем контейнер с переменными
-sudo docker run -d --name sausage-backend \
-     --restart unless-stopped \
-     --env SPRING_DATASOURCE_URL="jdbc:postgresql://rc1a-kylrrnh13yjqhvlv.mdb.yandexcloud.net:6432/std-030-13?ssl=true" \
-     --env SPRING_DATASOURCE_USERNAME="${DB_USER}" \
-     --env SPRING_DATASOURCE_PASSWORD="${DB_PASS}" \
-     --env SPRING_DATA_MONGODB_URI="mongodb://${DB_USER}:${DB_PASS}@rc1a-3nb7p7jsmbup6crt.mdb.yandexcloud.net:27018/std-030-13?tls=true" \
-     --network=sausage_network \
-     "${CI_REGISTRY_IMAGE}"/sausage-backend:${VERSION}
+#!/bin/sh
+
+# Имена контейнеров
+GREEN_CONTAINER="green"
+BLUE_CONTAINER="blue"
+
+# Определяем активный и резервный контейнеры
+if [ "$(docker --context remote inspect --format '{{.State.Running}}' $GREEN_CONTAINER 2>/dev/null)" = "true" ]; then
+    CURRENT_CONTAINER=$GREEN_CONTAINER
+    NEW_CONTAINER=$BLUE_CONTAINER
+elif [ "$(docker --context remote inspect --format '{{.State.Running}}' $BLUE_CONTAINER 2>/dev/null)" = "true" ]; then
+    CURRENT_CONTAINER=$BLUE_CONTAINER
+    NEW_CONTAINER=$GREEN_CONTAINER
+else
+    echo "Ни один контейнер не запущен. Запускаем $GREEN_CONTAINER..."
+    docker --context remote compose --env-file deploy.env up backend_$GREEN_CONTAINER -d --pull "always" --force-recreate
+    exit 0
+fi
+
+# Проверка статуса текущего контейнера
+CURRENT_STATUS=$(docker --context remote inspect --format '{{.State.Health.Status}}' $CURRENT_CONTAINER 2>/dev/null)
+
+# Если текущий контейнер работает и имеет статус "healthy"
+if [ "$CURRENT_STATUS" = "healthy" ]; then
+    echo "$CURRENT_CONTAINER контейнер запущен и работает. Перезапускаем на $NEW_CONTAINER..."
+    docker --context remote compose --env-file deploy.env up backend_$NEW_CONTAINER -d --pull "always" --force-recreate
+    docker --context remote stop $CURRENT_CONTAINER
+    docker --context remote rm $CURRENT_CONTAINER
+else
+    echo "$CURRENT_CONTAINER контейнер не работает или статус не определен. Запускаем $NEW_CONTAINER..."
+    docker --context remote compose --env-file deploy.env up backend_$NEW_CONTAINER -d --pull "always" --force-recreate
+fi
