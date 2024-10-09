@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # Имена контейнеров
-GREEN_CONTAINER="sausage-backend_green"
-BLUE_CONTAINER="sausage-backend_blue"
+GREEN_CONTAINER="green"
+BLUE_CONTAINER="blue"
 
 # Определяем активный и резервный контейнеры
 if [ "$(docker --context remote inspect --format '{{.State.Running}}' "$GREEN_CONTAINER"-1 2>/dev/null)" = "true" ]; then
